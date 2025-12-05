@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mode Randomizer - Surf City</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00ffff;
+            --neon-purple: #ff00ff;
+            --neon-yellow: #ffc800;
+            --bg-beach-gradient: linear-gradient(to bottom, #ff6b6b, #ffc800, #00d2ff);
+            --glass: rgba(255, 255, 255, 0.25);
+            --ui-dark-teal: #005f6b;
+        }
+
+        body {
+            background: var(--bg-beach-gradient);
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Cairo', sans-serif;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .font-gaming {
+            font-family: 'Cairo', sans-serif;
+            font-weight: 900;
+        }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 210, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .mode-display {
+            background: rgba(0, 60, 80, 0.5);
+            border: 2px solid var(--neon-blue);
+            box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.3);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+            opacity: 0.8;
+        }
+
+        .mode-display.highlight {
+            border-color: var(--neon-yellow);
+            box-shadow: 0 0 40px rgba(255, 200, 0, 0.5), inset 0 0 20px rgba(0,0,0,0.2);
+            animation: pulse-border 1.5s infinite;
+        }
+
+        .mode-text {
+            transition: transform 0.1s;
+            color: white;
+        }
+
+        .mode-text.blur-anim {
+            filter: blur(2px);
+            opacity: 0.8;
+            transform: scale(0.95);
+        }
+
+        .mode-text.winner {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 20px var(--neon-yellow), 0 0 5px #ff0000;
+            transform: scale(1.1);
+            filter: blur(0);
+            opacity: 1;
+        }
+
+        .cyber-btn {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+            color: white;
+            font-weight: 900;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 6px 6px 0px var(--ui-dark-teal);
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            position: relative;
+            clip-path: polygon(5% 0, 100% 0, 100% 85%, 95% 100%, 0 100%, 0 15%);
+        }
+
+        .cyber-btn:hover:not(:disabled) {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0px var(--ui-dark-teal);
+            filter: brightness(1.15);
+        }
+
+        .cyber-btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--ui-dark-teal);
+        }
+
+        .cyber-btn:disabled {
+            background: linear-gradient(45deg, #4a5568, #2d3748);
+            box-shadow: 6px 6px 0px #1a202c;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .corner {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border: 3px solid var(--neon-yellow);
+            box-shadow: 0 0 10px var(--neon-yellow);
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+        .top-left { top: -4px; left: -4px; border-right: 0; border-bottom: 0; }
+        .top-right { top: -4px; right: -4px; border-left: 0; border-bottom: 0; }
+        .bottom-left { bottom: -4px; left: -4px; border-right: 0; border-top: 0; }
+        .bottom-right { bottom: -4px; right: -4px; border-left: 0; border-top: 0; }
+
+        @keyframes pulse-border {
+            0% { border-color: var(--neon-yellow); }
+            50% { border-color: white; }
+            100% { border-color: var(--neon-yellow); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: var(--neon-purple) !important;
+            text-shadow: 2px 2px var(--neon-blue), -2px -2px var(--neon-yellow) !important;
+        }
+
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.05) 50%,
+                rgba(0,0,0,0.05)
+            );
+            background-size: 100% 4px;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .pip-inactive { background-color: rgba(255, 255, 255, 0.3); }
+        .pip-active { background-color: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+        .pip-final { background-color: var(--neon-yellow); box-shadow: 0 0 15px var(--neon-yellow); }
+
+        .waves-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .waves {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin-bottom: -7px;
+            min-height: 100px;
+            max-height: 150px;
+        }
+        
+        .parallax > use {
+            animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
+        }
+        
+        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+
+        @keyframes move-forever {
+            0% { transform: translate3d(-90px, 0, 0); }
+            100% { transform: translate3d(85px, 0, 0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="waves-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+        <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax">
+        <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.15)" />
+        <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.1)" />
+        <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(0, 255, 255, 0.1)" />
+        <use xlink:href="#gentle-wave" x="48" y="7" fill="rgba(255, 200, 0, 0.1)" />
+        </g>
+        </svg>
+    </div>
+
+    <div class="relative w-full max-w-lg p-6">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <div class="glass-panel p-12 rounded-2xl text-center relative z-20">
+            
+            <div class="mb-6">
+                <h2 class="text-white text-opacity-80 text-sm mb-4 font-bold shadow-sm">عودة المشاهير</h2>
+                <h1 class="text-5xl font-gaming font-black italic bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-yellow-400 to-cyan-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] pb-4 leading-normal">
+                    آلة التحديات
+                </h1>
+            </div>
+
+            <div id="display-box" class="mode-display rounded-xl mb-12 p-8">
+                <p id="result-text" class="text-2xl md:text-3xl font-bold tracking-wider mode-text">
+                    هل أنت مستعد لتحديد مصير الجميع؟
+                </p>
+            </div>
+
+            <button id="roll-btn" class="cyber-btn w-full py-6 text-2xl font-gaming font-bold uppercase tracking-widest">
+                اختر التحدي القادم!
+            </button>
+
+            <div class="mt-12 flex justify-center gap-3">
+                <div class="h-2 w-10 rounded-full status-pip pip-inactive"></div>
+                <div class="h-2 w-10 rounded-full status-pip pip-inactive"></div>
+                <div class="h-2 w-10 rounded-full status-pip pip-inactive"></div>
+                <div class="h-2 w-10 rounded-full status-pip pip-inactive"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modes = [
+            "ريلود بدون بناء",
+            "ريلود بناء",
+            "ريلود فؤوس فقط",
+            "ريلود الكل ينزل بنفس المكان، وانت تختاره",
+            "ريلود واحد يضرب والثاني يبني فقط"
+        ];
+
+        const btn = document.getElementById('roll-btn');
+        const displayBox = document.getElementById('display-box');
+        const resultText = document.getElementById('result-text');
+        const pips = document.querySelectorAll('.status-pip');
+
+        let isRolling = false;
+        
+        let lastMode = null;
+        let repeatCount = 0;
+
+        function triggerHaptic() {
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        btn.addEventListener('click', () => {
+            if (isRolling) return;
+            startRoll();
+        });
+
+        function startRoll() {
+            isRolling = true;
+            btn.disabled = true;
+            btn.textContent = "...يتم التحديد";
+            
+            displayBox.classList.remove('highlight');
+            resultText.classList.remove('winner');
+            resultText.classList.add('blur-anim');
+            
+            pips.forEach(pip => {
+                pip.classList.remove('pip-active', 'pip-final');
+                pip.classList.add('pip-inactive');
+            });
+
+            let counter = 0;
+            const totalIterations = 25;
+            let speed = 50; 
+
+            const rollLoop = () => {
+                const tempMode = modes[Math.floor(Math.random() * modes.length)];
+                resultText.textContent = tempMode;
+                
+                triggerHaptic();
+                
+                pips.forEach(p => {
+                     p.classList.remove('pip-active');
+                     p.classList.add('pip-inactive');
+                });
+                
+                const currentPip = pips[counter % pips.length];
+                currentPip.classList.remove('pip-inactive');
+                currentPip.classList.add('pip-active');
+
+                counter++;
+
+                if (counter < totalIterations) {
+                    if (counter > totalIterations - 8) {
+                        speed += 30;
+                    }
+                    setTimeout(rollLoop, speed);
+                } else {
+                    finalizeSelection();
+                }
+            };
+
+            rollLoop();
+        }
+
+        function finalizeSelection() {
+            let candidateModes = modes;
+
+            if (repeatCount >= 2 && lastMode) {
+                candidateModes = modes.filter(m => m !== lastMode);
+            }
+
+            const finalChoice = candidateModes[Math.floor(Math.random() * candidateModes.length)];
+            
+            if (finalChoice === lastMode) {
+                repeatCount++;
+            } else {
+                lastMode = finalChoice;
+                repeatCount = 1;
+            }
+
+            resultText.textContent = finalChoice;
+            resultText.classList.remove('blur-anim');
+            resultText.classList.add('winner');
+            resultText.classList.add('glitch-effect');
+            
+            displayBox.classList.add('highlight');
+            
+            btn.textContent = "حان وقت المباراة!";
+            btn.disabled = false;
+            
+            setTimeout(() => {
+                resultText.classList.remove('glitch-effect');
+            }, 800);
+
+            pips.forEach(pip => {
+                pip.classList.remove('pip-active', 'pip-inactive');
+                pip.classList.add('pip-final');
+            });
+            
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            
+            isRolling = false;
+        }
+    </script>
+</body>
+</html>
